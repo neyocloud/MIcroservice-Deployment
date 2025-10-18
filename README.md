@@ -2,6 +2,16 @@
 CI/CD with GitHub Actions: Deploying a Docker Compose App on AWS EC2
 
 
+🧠 What You’ll Learn
+
+1) What are micro-services?
+
+2) How to deploy a micro-service app using Docker (Docker Compose) locally
+
+3) Automating the deployment process to an EC2 instance using CI/CD with GitHub Actions
+
+
+
 # Project Goals
 
 Containerize a multi‑service web app (Vote → Redis → Worker → Postgres → Result).
@@ -52,7 +62,7 @@ open http://localhost:8091 # result UI
 
 
 
-# lOGS & STATUS
+# LOGS & STATUS
 
 docker ps
 
