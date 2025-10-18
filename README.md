@@ -2,7 +2,8 @@
 CI/CD with GitHub Actions: Deploying a Docker Compose App on AWS EC2
 
 
-🧠 What You’ll Learn
+
+# What You’ll Learn
 
 1) What are micro-services?
 
