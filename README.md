@@ -1,7 +1,8 @@
 # MIcroservice-Deployment
 CI/CD with GitHub Actions: Deploying a Docker Compose App on AWS EC2
 
-Project Goals
+
+# Project Goals
 
 Containerize a multi‑service web app (Vote → Redis → Worker → Postgres → Result).
 
@@ -11,7 +12,9 @@ Push images to GitHub Container Registry (GHCR) or Docker Hub.
 
 Auto‑deploy to AWS EC2 using GitHub Actions over SSH.
 
-🧱 Architecture
+
+# 🧱 Architecture
+
 [ vote (Flask) ] -> [ redis ]
 
 [ worker (.NET) ] -> [ redis, db ]
@@ -24,7 +27,9 @@ worker drains redis → persists to postgres
 
 result reads tallies from postgres
 
+
 <img width="860" height="800" alt="image" src="https://github.com/user-attachments/assets/b6dfbc7e-f598-4f80-8375-0dba6e04ce9b" />
+
 
 
 
@@ -33,7 +38,7 @@ result reads tallies from postgres
 
 
 
-DOCKER  ENGINE RUNNING 
+# DOCKER  ENGINE RUNNING 
 
 docker compose -f compose/docker-compose.yml up -d --build
 
@@ -54,3 +59,5 @@ docker ps
 docker compose up
 
 docker compose -d (running in the background )
+
+docker logs ########
