@@ -327,6 +327,16 @@ EC2 containers unhealthy → check logs: docker compose logs -f <service>.
 
 <img width="2048" height="1330" alt="image" src="https://github.com/user-attachments/assets/f99dc141-86dd-4988-85c0-fbbb5a87be57" />
 
+
+
+<img width="1512" height="982" alt="image" src="https://github.com/user-attachments/assets/a82fd832-48e6-4299-8339-184b4572f068" />
+
+
+
+
+
+
+
 Thank you for staying
 
 
