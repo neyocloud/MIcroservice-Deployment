@@ -1,3 +1,8 @@
+[![deploy-to-ec2](https://github.com/neyocloud/Voting-App/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/neyocloud/Voting-App/actions/workflows/deploy.yml)
+
+
+
+
 # MIcroservice-Deployment
 CI/CD with GitHub Actions: Deploying a Docker Compose App on AWS EC2
 
@@ -205,6 +210,9 @@ docker compose up -d
 docker compose ps
 EOF
 
+
+
+
 Security notes
 
 Never commit private keys. Store them only in GitHub Secrets and on your machine with chmod 600.
@@ -215,7 +223,94 @@ Enable MFA on AWS, GitHub, and Docker Hub.
 
 Restrict Security Groups (SSH from your IP only).
 
-Troubleshooting
+
+
+# Problems & Troubleshooting
+
+1) Workflows not triggering
+
+Symptom: Nothing in Actions after pushing.
+Root cause: Workflow file name/paths didn’t match triggers.
+Fix:
+
+Put the file at .github/workflows/deploy.yml.
+
+Limit on.push.paths to the folders I actually change (vote/**, result/**, worker/**, docker-compose.yaml, the workflow itself).
+
+Also enabled workflow_dispatch for manual runs.
+
+2) Docker Hub login failing in CI
+
+Symptom: Error: Username and password required / insufficient scopes / 401
+Root cause: Used website password instead of a Docker Hub Access Token.
+Fix:
+
+Create a token at Docker Hub → Settings → Personal access tokens.
+
+Add secrets:
+
+DOCKERHUB_USERNAME = neyocicd
+
+DOCKERHUB_TOKEN = the access token
+
+3) Images failed to push / private repos missing
+
+Symptom: push access denied, repository does not exist or may require authorization.
+Root cause: Not logged in or repo didn’t exist at push time.
+Fix: Log in with the token (see #2) and let the action create the repo implicitly by pushing:
+
+- uses: docker/login-action@v3
+  with:
+    username: ${{ secrets.DOCKERHUB_USERNAME }}
+    password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+4) SCP upload kept saying “tar: empty archive”
+
+Symptom: appleboy/scp-action printed tar: empty archive.
+Root cause: I targeted a non-existent path (compose/docker-compose.yml).
+Fix: The compose file lives at repo root; copy that exact file:
+
+scp -o StrictHostKeyChecking=no docker-compose.yaml \
+  $EC2_USER@$EC2_HOST:/opt/app/docker-compose.yaml
+
+5) Compose couldn’t install on Ubuntu 24.04
+
+Symptom: E: Unable to locate package docker-compose-plugin.
+Root cause: Docker APT repo wasn’t added on the instance.
+Fix: Add Docker’s official repo first, then install (done inside the SSH step):
+
+sudo apt-get update -y
+sudo apt-get install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" \
+| sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+sudo apt-get update -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+6) Permission denied talking to Docker on EC2
+
+Symptom: permission denied while trying to connect to the Docker daemon socket
+Root cause: The ubuntu user wasn’t in the docker group; CI was invoking Docker without sudo.
+Fix (fast + reliable in CI): Run all remote Docker commands with sudo:
+
+echo "$DOCKERHUB_TOKEN" | sudo docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+sudo docker compose -f /opt/app/docker-compose.yaml pull
+sudo docker compose -f /opt/app/docker-compose.yaml up -d
+
+
+(Alternative: add the user to the docker group and re-login, but sudo is simplest for automation.)
+
+Final Working Workflow 
+
+
+
+<img width="1512" height="982" alt="image" src="https://github.com/user-attachments/assets/5b3c5e5b-7e27-4f4a-a403-05152cb7daba" />
+
+
+
+
+
 
 Actions “Login to Docker Hub” fails → verify DOCKERHUB_USERNAME/DOCKERHUB_TOKEN secrets; token must have write access.
 
@@ -227,3 +322,11 @@ ssh -i ~/.ssh/<your-key> ubuntu@<EC2_HOST> 'uname -a && whoami'
 
 
 EC2 containers unhealthy → check logs: docker compose logs -f <service>.
+
+
+
+<img width="2048" height="1330" alt="image" src="https://github.com/user-attachments/assets/f99dc141-86dd-4988-85c0-fbbb5a87be57" />
+
+Thank you for staying
+
+
